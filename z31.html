@@ -16,6 +16,7 @@
             --muted-text: #4d667c;        /* Deep metallic dashboard shadow accent */
             --table-border: #13202e;
             --favorite-star: #ffcc00;
+            --delete-red: #ff4444;
         }
 
         body {
@@ -72,6 +73,44 @@
             padding-bottom: 10px;
             margin-top: 40px;
             text-shadow: 0 0 8px rgba(51, 255, 51, 0.4);
+        }
+
+        /* UNDO BANNER NOTIFICATION */
+        .undo-banner {
+            display: none;
+            background-color: var(--card-bg);
+            border: 1px solid var(--vfd-green);
+            color: var(--text-color);
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 0 15px rgba(51, 255, 51, 0.2);
+            font-family: monospace;
+        }
+
+        .undo-banner.active {
+            display: flex;
+        }
+
+        .undo-btn {
+            background-color: transparent;
+            color: var(--vfd-green);
+            border: 1px solid var(--vfd-green);
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .undo-btn:hover {
+            background-color: var(--vfd-green);
+            color: #000;
+            box-shadow: 0 0 8px rgba(51, 255, 51, 0.5);
         }
 
         /* ADD WISHLIST ITEM FORM */
@@ -243,7 +282,6 @@
             background-color: #0d1722;
         }
 
-        /* Purchased Row State */
         tr.purchased {
             opacity: 0.4;
             background-color: #050a0f !important;
@@ -254,24 +292,26 @@
             color: var(--muted-text);
         }
 
-        /* Delete Button for Custom Items */
         .delete-btn {
             background: none;
-            border: none;
-            color: #ff3333;
+            border: 1px solid transparent;
+            color: var(--delete-red);
             font-family: monospace;
             font-size: 1rem;
             cursor: pointer;
-            padding: 0 5px;
+            padding: 2px 6px;
+            border-radius: 3px;
             opacity: 0.6;
-            transition: opacity 0.2s;
+            transition: all 0.2s;
         }
 
         .delete-btn:hover {
             opacity: 1;
+            border-color: var(--delete-red);
+            background-color: rgba(255, 68, 68, 0.1);
+            box-shadow: 0 0 8px rgba(255, 68, 68, 0.4);
         }
 
-        /* Favorite Star Button */
         .star-btn {
             background: none;
             border: none;
@@ -412,7 +452,7 @@
 <div class="container">
     <header>
         <h1>SYS.TRACK // CARROZZERIA_OEL</h1>
-        <p>Telemetry Dashboard • Chassis Spec #106 Blue Mist Metallic • Interactive Wishlist Engine</p>
+        <p>Telemetry Dashboard • Chassis Spec #106 Blue Mist Metallic • Interactive Build Engine</p>
     </header>
 
     <!-- WISHLIST INPUT DRAWER -->
@@ -444,6 +484,12 @@
     <!-- INTERACTIVE CONTROL PANEL -->
     <h2 class="section-title">[01] PERFORMANCE PARTS MATRIX &amp; BUDGET CONTROL</h2>
     
+    <!-- UNDO BANNER NOTIFICATION -->
+    <div id="undoBanner" class="undo-banner">
+        <div>SYSTEM: Component <strong id="deletedItemName">Item</strong> purged from matrix.</div>
+        <button class="undo-btn" onclick="undoLastDelete()">↩ Undo Delete</button>
+    </div>
+
     <div class="controls-bar">
         <div class="control-group">
             <label for="sortSelect">Sort Price:</label>
@@ -484,7 +530,7 @@
                     <th>Vendor Source</th>
                     <th>Expected Impact &amp; Mod Properties</th>
                     <th>Cost Allocation</th>
-                    <th style="width: 30px;"></th>
+                    <th style="width: 40px; text-align: center;">Remove</th>
                 </tr>
             </thead>
             <tbody id="partsTbody">
@@ -496,7 +542,7 @@
                     <td>Godzilla Raceworks</td>
                     <td>Chassis lowering, modern dampening, custom spring rates for semi-trailing arm</td>
                     <td class="price-tag">$1,290.00</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="2" data-price="563.76">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -505,7 +551,7 @@
                     <td>eBay Collectors</td>
                     <td>Period-correct old school audio visual EQ analyzer stack coolness</td>
                     <td class="price-tag">$563.76</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="3" data-price="397.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -514,7 +560,7 @@
                     <td>The Z Store</td>
                     <td>Complete exhaust configuration upgrade for enhanced VG30 sound signature</td>
                     <td class="price-tag">$397.87</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="4" data-price="349.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -523,7 +569,7 @@
                     <td>The Z Store</td>
                     <td>Eliminates high-speed body roll; flattens retro suspension curves</td>
                     <td class="price-tag">$349.87</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="5" data-price="249.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -532,7 +578,7 @@
                     <td>The Z Store</td>
                     <td>Alternative direct slip-fit routing option for increased exhaust gas flow</td>
                     <td class="price-tag">$249.87</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="6" data-price="179.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -541,7 +587,7 @@
                     <td>The Z Store</td>
                     <td>Interior comfort restoration upgrade replacing cracked factory foam</td>
                     <td class="price-tag">$179.87</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="7" data-price="88.00">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -550,7 +596,7 @@
                     <td>MagnaFlow / Vendor</td>
                     <td>High-flow clean exhaust emissions element matched with performance pipes</td>
                     <td class="price-tag">$88.00</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
                 <tr data-id="8" data-price="38.99">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -559,7 +605,7 @@
                     <td>AutoZone / Local</td>
                     <td>Consistent ignition spark restoration with matching blue bay contrast aesthetics</td>
                     <td class="price-tag">$38.99</td>
-                    <td></td>
+                    <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
                 </tr>
             </tbody>
         </table>
@@ -733,10 +779,13 @@
 <!-- JAVASCRIPT ENGINE -->
 <script>
     let allRows = [];
+    let lastDeletedItem = null;
+    let undoTimeout = null;
 
     document.addEventListener("DOMContentLoaded", () => {
         loadCustomParts();
         cacheAllRows();
+        loadDeletedParts();
         loadState();
         filterAndSortTable();
     });
@@ -760,17 +809,14 @@
 
         const customItem = { id, name, vendor, notes, price };
 
-        // Save to LocalStorage custom items array
         let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
         savedCustoms.push(customItem);
         localStorage.setItem("z31_custom_parts", JSON.stringify(savedCustoms));
 
-        // Append to DOM
         renderCustomRow(customItem);
         cacheAllRows();
         filterAndSortTable();
 
-        // Reset form
         document.getElementById("addPartForm").reset();
     }
 
@@ -788,28 +834,90 @@
             <td>${item.vendor}</td>
             <td>${item.notes}</td>
             <td class="price-tag">$${parseFloat(item.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td style="text-align: center;"><button class="delete-btn" onclick="deleteCustomPart('${item.id}', this)">✖</button></td>
+            <td style="text-align: center;"><button class="delete-btn" onclick="deletePart(this)">✖</button></td>
         `;
 
         tbody.appendChild(tr);
     }
 
-    function deleteCustomPart(id, btn) {
+    function deletePart(btn) {
         const tr = btn.closest("tr");
+        const id = tr.dataset.id;
+        const name = tr.querySelector(".item-name").innerText;
+        const index = allRows.indexOf(tr);
+
+        // Store state for undo action
+        lastDeletedItem = {
+            element: tr,
+            id: id,
+            index: index,
+            isCustom: tr.dataset.isCustom === "true"
+        };
+
+        // Remove from DOM tracking array & screen
+        allRows = allRows.filter(row => row.dataset.id !== id);
         tr.remove();
 
-        let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
-        savedCustoms = savedCustoms.filter(part => part.id !== id);
-        localStorage.setItem("z31_custom_parts", JSON.stringify(savedCustoms));
+        // Show Undo Banner
+        document.getElementById("deletedItemName").innerText = name;
+        const banner = document.getElementById("undoBanner");
+        banner.classList.add("active");
 
-        cacheAllRows();
+        if (undoTimeout) clearTimeout(undoTimeout);
+        undoTimeout = setTimeout(() => {
+            banner.classList.remove("active");
+            commitDeletion(lastDeletedItem);
+            lastDeletedItem = null;
+        }, 6000); // 6 Seconds window to undo
+
         saveState();
         filterAndSortTable();
+    }
+
+    function commitDeletion(item) {
+        if (!item) return;
+        if (item.isCustom) {
+            let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
+            savedCustoms = savedCustoms.filter(part => part.id !== item.id);
+            localStorage.setItem("z31_custom_parts", JSON.stringify(savedCustoms));
+        } else {
+            let deletedIds = JSON.parse(localStorage.getItem("z31_deleted_parts") || "[]");
+            if (!deletedIds.includes(item.id)) {
+                deletedIds.push(item.id);
+                localStorage.setItem("z31_deleted_parts", JSON.stringify(deletedIds));
+            }
+        }
+    }
+
+    function undoLastDelete() {
+        if (!lastDeletedItem) return;
+
+        if (undoTimeout) clearTimeout(undoTimeout);
+
+        // Re-insert element back into tracking array
+        allRows.splice(lastDeletedItem.index, 0, lastDeletedItem.element);
+        
+        document.getElementById("undoBanner").classList.remove("active");
+        lastDeletedItem = null;
+
+        filterAndSortTable();
+        saveState();
     }
 
     function loadCustomParts() {
         let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
         savedCustoms.forEach(item => renderCustomRow(item));
+    }
+
+    function loadDeletedParts() {
+        let deletedIds = JSON.parse(localStorage.getItem("z31_deleted_parts") || "[]");
+        deletedIds.forEach(id => {
+            const tr = document.querySelector(`tr[data-id="${id}"]`);
+            if (tr) {
+                tr.remove();
+            }
+        });
+        cacheAllRows();
     }
 
     function togglePurchased(checkbox) {
