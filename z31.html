@@ -234,15 +234,34 @@
             box-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
         }
 
+        /* DUAL HUD TOTAL METERS */
+        .hud-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
         .total-hud {
             font-family: 'Courier New', Courier, monospace;
-            font-size: 1.1rem;
+            font-size: 1rem;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .hud-remaining {
             color: var(--vfd-green);
             background: #000;
-            padding: 8px 15px;
-            border-radius: 4px;
             border: 1px solid var(--vfd-green);
             text-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+        }
+
+        .hud-spent {
+            color: var(--warning-orange);
+            background: #000;
+            border: 1px solid var(--warning-orange);
+            text-shadow: 0 0 5px rgba(255, 153, 0, 0.5);
         }
 
         /* TABLE INTERACTIVE STYLES */
@@ -514,8 +533,13 @@
             <input type="range" id="priceRange" min="0" max="2500" step="10" value="2000" oninput="updatePriceLabel(this.value); filterAndSortTable();">
         </div>
 
-        <div class="total-hud">
-            REMAINING: $<span id="totalRemaining">0.00</span>
+        <div class="hud-container">
+            <div class="total-hud hud-remaining">
+                REMAINING: $<span id="totalRemaining">0.00</span>
+            </div>
+            <div class="total-hud hud-spent">
+                SPENT: $<span id="totalSpent">0.00</span>
+            </div>
         </div>
     </div>
 
@@ -846,7 +870,6 @@
         const name = tr.querySelector(".item-name").innerText;
         const index = allRows.indexOf(tr);
 
-        // Store state for undo action
         lastDeletedItem = {
             element: tr,
             id: id,
@@ -854,11 +877,9 @@
             isCustom: tr.dataset.isCustom === "true"
         };
 
-        // Remove from DOM tracking array & screen
         allRows = allRows.filter(row => row.dataset.id !== id);
         tr.remove();
 
-        // Show Undo Banner
         document.getElementById("deletedItemName").innerText = name;
         const banner = document.getElementById("undoBanner");
         banner.classList.add("active");
@@ -868,7 +889,7 @@
             banner.classList.remove("active");
             commitDeletion(lastDeletedItem);
             lastDeletedItem = null;
-        }, 6000); // 6 Seconds window to undo
+        }, 6000);
 
         saveState();
         filterAndSortTable();
@@ -894,7 +915,6 @@
 
         if (undoTimeout) clearTimeout(undoTimeout);
 
-        // Re-insert element back into tracking array
         allRows.splice(lastDeletedItem.index, 0, lastDeletedItem.element);
         
         document.getElementById("undoBanner").classList.remove("active");
@@ -928,7 +948,7 @@
             row.classList.remove("purchased");
         }
         saveState();
-        calculateTotal();
+        calculateTotals();
         filterAndSortTable();
     }
 
@@ -938,15 +958,23 @@
         filterAndSortTable();
     }
 
-    function calculateTotal() {
-        let total = 0;
+    function calculateTotals() {
+        let remainingTotal = 0;
+        let spentTotal = 0;
+
         allRows.forEach(row => {
             const isChecked = row.querySelector(".custom-checkbox").checked;
-            if (!isChecked) {
-                total += parseFloat(row.dataset.price);
+            const price = parseFloat(row.dataset.price);
+
+            if (isChecked) {
+                spentTotal += price;
+            } else {
+                remainingTotal += price;
             }
         });
-        document.getElementById("totalRemaining").innerText = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        document.getElementById("totalRemaining").innerText = remainingTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById("totalSpent").innerText = spentTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     function filterAndSortTable() {
@@ -976,7 +1004,7 @@
         tbody.innerHTML = "";
         filtered.forEach(row => tbody.appendChild(row));
 
-        calculateTotal();
+        calculateTotals();
     }
 
     function saveState() {
