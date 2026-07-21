@@ -74,6 +74,83 @@
             text-shadow: 0 0 8px rgba(51, 255, 51, 0.4);
         }
 
+        /* ADD WISHLIST ITEM FORM */
+        .add-item-drawer {
+            background-color: var(--card-bg);
+            border: 1px solid var(--vfd-green);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 0 15px rgba(51, 255, 51, 0.15);
+        }
+
+        .drawer-title {
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            color: var(--vfd-green);
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--accent-color);
+            text-transform: uppercase;
+        }
+
+        .custom-input {
+            background-color: #0d1722;
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .custom-input:focus {
+            box-shadow: 0 0 8px rgba(0, 243, 255, 0.5);
+            border-color: var(--highlight-color);
+        }
+
+        .add-btn {
+            background-color: transparent;
+            color: var(--vfd-green);
+            border: 1px solid var(--vfd-green);
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover {
+            background-color: var(--vfd-green);
+            color: #000;
+            box-shadow: 0 0 12px rgba(51, 255, 51, 0.6);
+        }
+
         /* CONTROLS BAR STYLE */
         .controls-bar {
             background-color: var(--card-bg);
@@ -175,6 +252,23 @@
         tr.purchased td.item-name {
             text-decoration: line-through;
             color: var(--muted-text);
+        }
+
+        /* Delete Button for Custom Items */
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #ff3333;
+            font-family: monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0 5px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .delete-btn:hover {
+            opacity: 1;
         }
 
         /* Favorite Star Button */
@@ -318,8 +412,34 @@
 <div class="container">
     <header>
         <h1>SYS.TRACK // CARROZZERIA_OEL</h1>
-        <p>Telemetry Dashboard • Chassis Spec #106 Blue Mist Metallic • Interactive Build Engine</p>
+        <p>Telemetry Dashboard • Chassis Spec #106 Blue Mist Metallic • Interactive Wishlist Engine</p>
     </header>
+
+    <!-- WISHLIST INPUT DRAWER -->
+    <div class="add-item-drawer">
+        <div class="drawer-title">+ Add New Part To Wishlist Matrix</div>
+        <form id="addPartForm" onsubmit="addNewPart(event)">
+            <div class="form-grid">
+                <div class="input-group">
+                    <label for="partName">Component Name *</label>
+                    <input type="text" id="partName" class="custom-input" placeholder="e.g. JWT ECU Chip" required>
+                </div>
+                <div class="input-group">
+                    <label for="partVendor">Vendor Source</label>
+                    <input type="text" id="partVendor" class="custom-input" placeholder="e.g. Jim Wolf Technology">
+                </div>
+                <div class="input-group">
+                    <label for="partNotes">Mod Properties &amp; Notes</label>
+                    <input type="text" id="partNotes" class="custom-input" placeholder="e.g. Tune for 450cc injectors">
+                </div>
+                <div class="input-group">
+                    <label for="partPrice">Cost ($) *</label>
+                    <input type="number" step="0.01" id="partPrice" class="custom-input" placeholder="0.00" required>
+                </div>
+            </div>
+            <button type="submit" class="add-btn">+ Add Component To List</button>
+        </form>
+    </div>
 
     <!-- INTERACTIVE CONTROL PANEL -->
     <h2 class="section-title">[01] PERFORMANCE PARTS MATRIX &amp; BUDGET CONTROL</h2>
@@ -344,8 +464,8 @@
         </div>
 
         <div class="control-group">
-            <label for="priceRange">Max Price: $<span id="priceValue">1500</span></label>
-            <input type="range" id="priceRange" min="0" max="1500" step="10" value="1500" oninput="updatePriceLabel(this.value); filterAndSortTable();">
+            <label for="priceRange">Max Price: $<span id="priceValue">2000</span></label>
+            <input type="range" id="priceRange" min="0" max="2500" step="10" value="2000" oninput="updatePriceLabel(this.value); filterAndSortTable();">
         </div>
 
         <div class="total-hud">
@@ -364,9 +484,11 @@
                     <th>Vendor Source</th>
                     <th>Expected Impact &amp; Mod Properties</th>
                     <th>Cost Allocation</th>
+                    <th style="width: 30px;"></th>
                 </tr>
             </thead>
             <tbody id="partsTbody">
+                <!-- Hardcoded Default Wishlist Items -->
                 <tr data-id="1" data-price="1290.00">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
                     <td style="text-align: center;"><button class="star-btn" onclick="toggleFavorite(this)">★</button></td>
@@ -374,6 +496,7 @@
                     <td>Godzilla Raceworks</td>
                     <td>Chassis lowering, modern dampening, custom spring rates for semi-trailing arm</td>
                     <td class="price-tag">$1,290.00</td>
+                    <td></td>
                 </tr>
                 <tr data-id="2" data-price="563.76">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -382,6 +505,7 @@
                     <td>eBay Collectors</td>
                     <td>Period-correct old school audio visual EQ analyzer stack coolness</td>
                     <td class="price-tag">$563.76</td>
+                    <td></td>
                 </tr>
                 <tr data-id="3" data-price="397.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -390,6 +514,7 @@
                     <td>The Z Store</td>
                     <td>Complete exhaust configuration upgrade for enhanced VG30 sound signature</td>
                     <td class="price-tag">$397.87</td>
+                    <td></td>
                 </tr>
                 <tr data-id="4" data-price="349.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -398,6 +523,7 @@
                     <td>The Z Store</td>
                     <td>Eliminates high-speed body roll; flattens retro suspension curves</td>
                     <td class="price-tag">$349.87</td>
+                    <td></td>
                 </tr>
                 <tr data-id="5" data-price="249.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -406,6 +532,7 @@
                     <td>The Z Store</td>
                     <td>Alternative direct slip-fit routing option for increased exhaust gas flow</td>
                     <td class="price-tag">$249.87</td>
+                    <td></td>
                 </tr>
                 <tr data-id="6" data-price="179.87">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -414,6 +541,7 @@
                     <td>The Z Store</td>
                     <td>Interior comfort restoration upgrade replacing cracked factory foam</td>
                     <td class="price-tag">$179.87</td>
+                    <td></td>
                 </tr>
                 <tr data-id="7" data-price="88.00">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -422,6 +550,7 @@
                     <td>MagnaFlow / Vendor</td>
                     <td>High-flow clean exhaust emissions element matched with performance pipes</td>
                     <td class="price-tag">$88.00</td>
+                    <td></td>
                 </tr>
                 <tr data-id="8" data-price="38.99">
                     <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
@@ -430,6 +559,7 @@
                     <td>AutoZone / Local</td>
                     <td>Consistent ignition spark restoration with matching blue bay contrast aesthetics</td>
                     <td class="price-tag">$38.99</td>
+                    <td></td>
                 </tr>
             </tbody>
         </table>
@@ -602,17 +732,84 @@
 
 <!-- JAVASCRIPT ENGINE -->
 <script>
-    let originalRows = [];
+    let allRows = [];
 
     document.addEventListener("DOMContentLoaded", () => {
-        const tbody = document.getElementById("partsTbody");
-        originalRows = Array.from(tbody.querySelectorAll("tr"));
+        loadCustomParts();
+        cacheAllRows();
         loadState();
         filterAndSortTable();
     });
 
+    function cacheAllRows() {
+        const tbody = document.getElementById("partsTbody");
+        allRows = Array.from(tbody.querySelectorAll("tr"));
+    }
+
     function updatePriceLabel(val) {
         document.getElementById("priceValue").innerText = val;
+    }
+
+    function addNewPart(e) {
+        e.preventDefault();
+        const name = document.getElementById("partName").value;
+        const vendor = document.getElementById("partVendor").value || "Custom Sourced";
+        const notes = document.getElementById("partNotes").value || "N/A";
+        const price = parseFloat(document.getElementById("partPrice").value).toFixed(2);
+        const id = "custom_" + Date.now();
+
+        const customItem = { id, name, vendor, notes, price };
+
+        // Save to LocalStorage custom items array
+        let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
+        savedCustoms.push(customItem);
+        localStorage.setItem("z31_custom_parts", JSON.stringify(savedCustoms));
+
+        // Append to DOM
+        renderCustomRow(customItem);
+        cacheAllRows();
+        filterAndSortTable();
+
+        // Reset form
+        document.getElementById("addPartForm").reset();
+    }
+
+    function renderCustomRow(item) {
+        const tbody = document.getElementById("partsTbody");
+        const tr = document.createElement("tr");
+        tr.dataset.id = item.id;
+        tr.dataset.price = item.price;
+        tr.dataset.isCustom = "true";
+
+        tr.innerHTML = `
+            <td style="text-align: center;"><input type="checkbox" class="custom-checkbox" onchange="togglePurchased(this)"></td>
+            <td style="text-align: center;"><button class="star-btn" onclick="toggleFavorite(this)">★</button></td>
+            <td class="item-name"><strong>${item.name}</strong></td>
+            <td>${item.vendor}</td>
+            <td>${item.notes}</td>
+            <td class="price-tag">$${parseFloat(item.price).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td style="text-align: center;"><button class="delete-btn" onclick="deleteCustomPart('${item.id}', this)">✖</button></td>
+        `;
+
+        tbody.appendChild(tr);
+    }
+
+    function deleteCustomPart(id, btn) {
+        const tr = btn.closest("tr");
+        tr.remove();
+
+        let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
+        savedCustoms = savedCustoms.filter(part => part.id !== id);
+        localStorage.setItem("z31_custom_parts", JSON.stringify(savedCustoms));
+
+        cacheAllRows();
+        saveState();
+        filterAndSortTable();
+    }
+
+    function loadCustomParts() {
+        let savedCustoms = JSON.parse(localStorage.getItem("z31_custom_parts") || "[]");
+        savedCustoms.forEach(item => renderCustomRow(item));
     }
 
     function togglePurchased(checkbox) {
@@ -635,13 +832,13 @@
 
     function calculateTotal() {
         let total = 0;
-        originalRows.forEach(row => {
+        allRows.forEach(row => {
             const isChecked = row.querySelector(".custom-checkbox").checked;
             if (!isChecked) {
                 total += parseFloat(row.dataset.price);
             }
         });
-        document.getElementById("totalRemaining").innerText = total.toFixed(2);
+        document.getElementById("totalRemaining").innerText = total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     }
 
     function filterAndSortTable() {
@@ -650,13 +847,12 @@
         const favVal = document.getElementById("filterFavs").value;
         const maxPrice = parseFloat(document.getElementById("priceRange").value);
 
-        let filtered = originalRows.filter(row => {
+        let filtered = allRows.filter(row => {
             const price = parseFloat(row.dataset.price);
             const isFav = row.querySelector(".star-btn").classList.contains("active");
             const isPurchased = row.querySelector(".custom-checkbox").checked;
 
             if (price > maxPrice) return false;
-
             if (favVal === "favs" && !isFav) return false;
             if (favVal === "unpurchased" && isPurchased) return false;
 
@@ -677,7 +873,7 @@
 
     function saveState() {
         const state = {};
-        originalRows.forEach(row => {
+        allRows.forEach(row => {
             const id = row.dataset.id;
             const isChecked = row.querySelector(".custom-checkbox").checked;
             const isFav = row.querySelector(".star-btn").classList.contains("active");
@@ -691,7 +887,7 @@
         if (!saved) return;
         const state = JSON.parse(saved);
 
-        originalRows.forEach(row => {
+        allRows.forEach(row => {
             const id = row.dataset.id;
             if (state[id]) {
                 const cb = row.querySelector(".custom-checkbox");
